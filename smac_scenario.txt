@@ -1,0 +1,5 @@
+use-instances = false
+numberOfRunsLimit = 100
+runObj = QUALITY
+pcs-file = params.pcs
+algo = smac_ftrl.py

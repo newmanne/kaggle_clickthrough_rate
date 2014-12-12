@@ -1,0 +1,5 @@
+alpha = .1  # learning rate
+beta = 1.   # smoothing parameter for adaptive learning rate
+L1 = 1.     # L1 regularization, larger value means more regularized
+L2 = 1.     # L2 regularization, larger value means more regularized
+epoch = 1       # learn training data for N passes
