@@ -1,8 +1,33 @@
 40428967 training set entries
 6865066 were clicked for a ctr of 0.16980562476 in the training data set
 1 day is October 31st = Halloween and might be a big anomoly
+The null values are coded as 'd41d8cd9'
 ID is obviously useless as a feature and is stripped out
 1 hot encoding is controlled via the D parameter -  you can calculate what the max D should be (this will impact memory usage, but you should probably figure out "optimal"). It also makes no sense to group users or sites or domains or anything this way...
+some users guess the hidden features - eg image size using cool analysis (https://www.kaggle.com/c/avazu-ctr-prediction/forums/t/11000/dataset-description)
+\
+
+data shaping = 1697.8s
+thresh = 100
+Col site_id highest seen is 1921
+Col site_domain highest seen is 1733
+Col site_category highest seen is 20
+Col app_id highest seen is 1718
+Col app_domain highest seen is 118
+Col app_category highest seen is 25
+Col device_id highest seen is 1946
+Col device_ip highest seen is 47497
+Col device_model highest seen is 3969
+Col C1 highest seen is 6
+Col C14 highest seen is 2163
+Col C15 highest seen is 7
+Col C16 highest seen is 8
+Col C17 highest seen is 453
+Col C18 highest seen is 3
+Col C19 highest seen is 67
+Col C20 highest seen is 159
+Col C21 highest seen is 61
+
 
 I can't create meta-features for things I don't understand, such as device type or conn type etc. I can't group them into "slow", "fast" or "tablet", "phone" even if I wanted to. 
 I think that probably user and category and site would be very important. 
@@ -10,6 +35,10 @@ I'm not sure how to test correlations, beyond a naieve bayes assumption.
 
 I need some graphs in the report - think about what they will be
 You could use smack to uber configure FTRL. It wouldn't actually be hard to do if you weren't interested in doing it well.
+
+You can't really do ANYTHING until you address the whole "poorly formed categorical data" thing. I think you have to encode them as numbers, which means you're better off replaced small data with dummy values.
+Also, preprocessing - via DictVectorizer or OneHot needs to be done on the data, asap
+
 
 From research:
 everyone wants to use something based on logisitc regression. FTRL-proximal seems like industry standard. Optimizations include: per-coordinate learning rates.
