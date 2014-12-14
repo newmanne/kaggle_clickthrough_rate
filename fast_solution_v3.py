@@ -41,7 +41,7 @@ L2 = 1.     # L2 regularization, larger value means more regularized
 
 # C, feature/hash trick
 D = 2 ** 20             # number of weights to use
-interaction = False     # whether to enable poly2 feature interactions
+interaction = True     # whether to enable poly2 feature interactions
 
 # D, training/validation
 epoch = 1       # learn training data for N passes
@@ -224,12 +224,6 @@ def data(path, D):
             if row['click'] == '1':
                 y = 1.
             del row['click']
-
-        # extract date
-        date = int(row['hour'][4:6])
-
-        # turn hour really into hour, it was originally YYMMDDHH
-        row['hour'] = row['hour'][6:]
 
         # build x
         x = []

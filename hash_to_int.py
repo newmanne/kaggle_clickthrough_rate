@@ -13,7 +13,7 @@ TRAIN_MERGED_DATA = '../merged_train.csv'
 TEST_MERGED_DATA = "../merged_test.csv"
 COUNTERS_FILE = '../counters.txt'
 
-CHUNK_SIZE = 500000
+CHUNK_SIZE = 1000000
 THRESH = 100
 
 def create_counters():    
@@ -78,4 +78,6 @@ if __name__ == "__main__":
     write_counters(COUNTERS_FILE, counters)
     ids = convert_counts_to_id(counters)
     max_id = write_translated(TRAIN_DATA,TRAIN_MERGED_DATA,ids)    
+    _ = write_translated(TRAIN_DATA,TEST_MERGED_DATA,ids, start_id=max_id)
+    max_id = write_translated(TEST_DATA,TEST_MERGED_DATA,ids)
     _ = write_translated(TEST_DATA,TEST_MERGED_DATA,ids, start_id=max_id)
