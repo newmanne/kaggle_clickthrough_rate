@@ -14,39 +14,13 @@ as the name is changed.
  0. You just DO WHAT THE FUCK YOU WANT TO.
 '''
 
-
 from datetime import datetime
 from csv import DictReader
 from math import exp, log, sqrt
-
+import argparse
 
 # TL; DR, the main training process starts on line: 250,
 # you may want to start reading the code from there
-
-
-##############################################################################
-# parameters #################################################################
-##############################################################################
-
-# A, paths
-train = 'train.csv'               # path to training file
-test = 'test.csv'                 # path to testing file
-submission = 'submission1234.csv'  # path of to be outputted submission file
-
-# B, model
-alpha = .1  # learning rate
-beta = 1.   # smoothing parameter for adaptive learning rate
-L1 = 1.     # L1 regularization, larger value means more regularized
-L2 = 1.     # L2 regularization, larger value means more regularized
-
-# C, feature/hash trick
-D = 2 ** 20             # number of weights to use
-interaction = True     # whether to enable poly2 feature interactions
-
-# D, training/validation
-epoch = 1       # learn training data for N passes
-holdafter = 9   # data after date N (exclusive) are used as validation
-holdout = None  # use every N training instance for holdout validation
 
 
 ##############################################################################
@@ -214,10 +188,6 @@ def data(path, D):
     '''
 
     for t, row in enumerate(DictReader(open(path))):
-        # process id
-        ID = row['id']
-        del row['id']
-
         # process clicks
         y = 0.
         if 'click' in row:
@@ -234,58 +204,74 @@ def data(path, D):
             index = abs(hash(key + '_' + value)) % D
             x.append(index)
 
-        yield t, date, ID, x, y
+        yield t, x, y
 
 
 ##############################################################################
 # start training #############################################################
 ##############################################################################
 
-start = datetime.now()
+def do_learning(train, alpha, beta, L1, L2, D, interaction, epoch, holdout, outfile):
+    start = datetime.now()
 
-# initialize ourselves a learner
-learner = ftrl_proximal(alpha, beta, L1, L2, D, interaction)
+    # initialize ourselves a learner
+    learner = ftrl_proximal(alpha, beta, L1, L2, D, interaction)
 
-# start training
-for e in xrange(epoch):
-    loss = 0.
-    count = 0
+    # start training
+    for e in xrange(epoch):
+        loss = 0.
+        count = 0
 
-    for t, date, ID, x, y in data(train, D):  # data is a generator
-        #    t: just a instance counter
-        # date: you know what this is
-        #   ID: id provided in original data
-        #    x: features
-        #    y: label (click)
+        for t, x, y in data(train, D):  # data is a generator
+            #    t: just a instance counter
+            #    x: features
+            #    y: label (click)
 
-        # step 1, get prediction from learner
-        p = learner.predict(x)
+            # step 1, get prediction from learner
+            p = learner.predict(x)
 
-        if (holdafter and date > holdafter) or (holdout and t % holdout == 0):
-            # step 2-1, calculate validation loss
-            #           we do not train with the validation data so that our
-            #           validation loss is an accurate estimation
-            #
-            # holdafter: train instances from day 1 to day N
-            #            validate with instances from day N + 1 and after
-            #
-            # holdout: validate with every N instance, train with others
-            loss += logloss(p, y)
-            count += 1
-        else:
-            # step 2-2, update learner with label (click) information
-            learner.update(x, p, y)
+            if (holdout and t % holdout == 0):
+                # step 2-1, calculate validation loss
+                #           we do not train with the validation data so that our
+                #           validation loss is an accurate estimation
+                #
+                # holdafter: train instances from day 1 to day N
+                #            validate with instances from day N + 1 and after
+                #
+                # holdout: validate with every N instance, train with others
+                loss += logloss(p, y)
+                count += 1
+            else:
+                # step 2-2, update learner with label (click) information
+                learner.update(x, p, y)
 
-    print('Epoch %d finished, validation logloss: %f, elapsed time: %s' % (
-        e, loss/count, str(datetime.now() - start)))
-
+        validation_logloss = loss/count
+        print('Epoch %d finished, validation logloss: %f, elapsed time: %s' % (
+            e, validation_logloss, str(datetime.now() - start)))
+        with open(outfile, 'w') as f:
+            f.write(validation_logloss)
 
 ##############################################################################
 # start testing, and build Kaggle's submission file ##########################
 ##############################################################################
+def write_submission():
+    with open(submission, 'w') as outfile:
+        outfile.write('id,click\n')
+        for t, date, ID, x, y in data(test, D):
+            p = learner.predict(x)
+            outfile.write('%s,%s\n' % (ID, str(p)))
 
-with open(submission, 'w') as outfile:
-    outfile.write('id,click\n')
-    for t, date, ID, x, y in data(test, D):
-        p = learner.predict(x)
-        outfile.write('%s,%s\n' % (ID, str(p)))
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='FTRL-Prox')
+    parser.add_argument('-t','--train_path', help='Path to training data', required=True)
+    parser.add_argument('-a', '--alpha', help='Learning rate', default=.1)
+    parser.add_argument('-b', '--beta', help='smoothing parameter for adaptive learning rate', default=.1)
+    parser.add_argument('-l1', '--l1_reg', help='l1 regularization', default=.1)
+    parser.add_argument('-l2', '--l2_reg', help='l2 regularization', default=.1)
+    parser.add_argument('-d', '--D', help='number of weights to use', default=2**20)
+    parser.add_argument('-i', '--interactions', help='use poly2 interactions', default=False)
+    parser.add_argument('-e', '--epoch', help='number of epochs to train for', default=1)
+    parser.add_argument('-h', '--holdout', help='hold every Nth example for validation', default=5)
+    args = vars(parser.parse_args())
+    do_learning(args['train_path'], args['alpha'], args['beta'], args['l1_reg'], args['l2_reg'], args['D'], args['interactions'], args['epoch'], args['holdout'])
