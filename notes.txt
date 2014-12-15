@@ -7,6 +7,15 @@ ID is obviously useless as a feature and is stripped out
 some users guess the hidden features - eg image size using cool analysis (https://www.kaggle.com/c/avazu-ctr-prediction/forums/t/11000/dataset-description)
 \
 
+Other benchmarks: http://mlwave.com/predicting-click-through-rates-with-online-machine-learning/
+Other research: http://research.microsoft.com/apps/pubs/default.aspx?id=122779
+
+
+STEPS:
+1) Clean the data -> hashes to integers, treat all as categorical
+2) Filter the data -> too many categories. Could use a feature hasher, instead choose to clamp
+
+
 data shaping = 1697.8s
 thresh = 100
 Col site_id highest seen is 1921
@@ -75,3 +84,38 @@ c20:Counter({'-1': 18937918, '100084': 2438478, '100148': 1794890, '100111': 171
 
 c21:
 Counter({'23': 8896205, '221': 5051245, '79': 4614799, '48': 2160794, '71': 2108496, '61': 2053636, '157': 1856105, '32': 1783343, '33': 1497559, '52': 1203050, '42': 1018906, '51': 850249, '15': 766986, '212': 659994, '43': 588961, '117': 419943, '229': 406539, '13': 384314, '16': 347178, '156': 334906, '68': 324148, '159': 290215, '95': 276988, '46': 235809, '246': 201746, '69': 176226, '91': 169042, '17': 166268, '111': 140305, '76': 138160, '70': 133539, '90': 128679, '110': 121407, '171': 115845, '204': 92782, '101': 81352, '253': 78375, '112': 74532, '82': 71393, '100': 65258, '178': 50055, '182': 49761, '108': 46723, '35': 46707, '94': 22206, '251': 21170, '116': 16189, '194': 14032, '20': 13365, '93': 12411, '102': 8954, '104': 8425, '126': 7780, '163': 6507, '177': 5618, '255': 4608, '195': 3890, '1': 3027, '219': 1765, '85': 497})
+
+
+
+Loading training data
+Done loading training data
+Initializing grid search
+Starting grid search
+Fitting 3 folds for each of 12 candidates, totalling 36 fits
+[Parallel(n_jobs=1)]: Done   1 jobs       | elapsed:  2.6min
+[Parallel(n_jobs=1)]: Done  36 out of  36 | elapsed: 90.1min finished
+Finished grid search
+Best parameters set found on development set:
+
+SGDClassifier(alpha=0.0001, class_weight=None, epsilon=0.1, eta0=0.0,
+       fit_intercept=True, l1_ratio=0.15, learning_rate='optimal',
+       loss='log', n_iter=10, n_jobs=1, penalty='l2', power_t=0.5,
+       random_state=None, shuffle=True, verbose=0, warm_start=False)
+
+Grid scores on development set:
+
+-0.478 (+/-0.003) for {'penalty': 'l1', 'loss': 'modified_huber', 'power_t': 0.5}
+-0.480 (+/-0.003) for {'penalty': 'l1', 'loss': 'modified_huber', 'power_t': 0.6}
+-0.418 (+/-0.002) for {'penalty': 'l2', 'loss': 'modified_huber', 'power_t': 0.5}
+-0.430 (+/-0.003) for {'penalty': 'l2', 'loss': 'modified_huber', 'power_t': 0.6}
+-0.415 (+/-0.002) for {'penalty': 'elasticnet', 'loss': 'modified_huber', 'power_t': 0.5}
+-0.424 (+/-0.003) for {'penalty': 'elasticnet', 'loss': 'modified_huber', 'power_t': 0.6}
+-0.409 (+/-0.000) for {'penalty': 'l1', 'loss': 'log', 'power_t': 0.5}
+-0.409 (+/-0.000) for {'penalty': 'l1', 'loss': 'log', 'power_t': 0.6}
+-0.402 (+/-0.000) for {'penalty': 'l2', 'loss': 'log', 'power_t': 0.5}
+-0.402 (+/-0.000) for {'penalty': 'l2', 'loss': 'log', 'power_t': 0.6}
+-0.404 (+/-0.000) for {'penalty': 'elasticnet', 'loss': 'log', 'power_t': 0.5}
+-0.404 (+/-0.000) for {'penalty': 'elasticnet', 'loss': 'log', 'power_t': 0.6}
+
+Validating the final result!
+Logistic loss is 0.401955087119
